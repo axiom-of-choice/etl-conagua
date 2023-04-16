@@ -4,7 +4,7 @@ from .utils import logger, logger_verbose
 import os
 
 @logger_verbose
-def generate_table_1(path: str = './airflow/data/intermediate/HourlyForecast_MX.json') -> pd.DataFrame:
+def generate_table_1(ti,path: str = './airflow/data/intermediate/HourlyForecast_MX.json') -> pd.DataFrame:
     '''Generates first table that contains the mean of temperature and precipitation aggregated by state and county 
 
     Args:
@@ -24,13 +24,15 @@ def generate_table_1(path: str = './airflow/data/intermediate/HourlyForecast_MX.
             (df['hora'] < datetime.datetime.today().hour)].groupby(['ides', 'idmun'])[['temp', 'prec']].mean()
         table_1 = table_1.reset_index() 
         logger.info('Table 1 succesfully generated')
-        return table_1
+        ti.xcom_push(key = 'table_1', value = table_1)
+        logger.info(df)
     except Exception as e:
         logger.exception(e)
         logger.error(msg='Table 1 failed')
+        raise ValueError
 
 @logger_verbose
-def generate_table_2(df: pd.DataFrame, path:str = './airflow/data/data_municipios') -> pd.DataFrame:
+def generate_table_2(ti, path:str = './airflow/data/data_municipios') -> pd.DataFrame:
     '''Generates the joined table between aggregated table and local tables
 
     Args:
@@ -48,14 +50,18 @@ def generate_table_2(df: pd.DataFrame, path:str = './airflow/data/data_municipio
         # data_mun = pd.concat([data_mun_1,data_mun_2])
         # del(data_mun_1)
         # del(data_mun_2)
+        df = ti.xcom_pull(key="table_1", task_ids = "generate_table_1")
         data_mun = pd.read_csv(f'{path}/{latest_data_path}')
         table_3 = pd.merge(left=df, right=data_mun, how='inner', left_on=['ides', 'idmun'], right_on=['Cve_Ent', 'Cve_Mun'])
         table_3.drop(['Cve_Ent', 'Cve_Mun'], axis=1, inplace=True)
         logger.info(msg='Table 2 successfuly generated')
-        return table_3
+        logger.info(table_3)
+        #return table_3
+        ti.xcom_push(key = 'table_2', value = table_3)
     except Exception as e:
         logger.exception(e)
         logger.error(msg='Table 2 failed')
+        raise ValueError
 
 # def transform(path: str = './data/intermediate/HourlyForecast_MX.json') -> pd.DataFrame:
 #     '''Wrapper that generates both tables

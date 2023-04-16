@@ -25,6 +25,7 @@ def extract_raw_file(url: str = "https://smn.conagua.gob.mx/webservices/?method=
     except Exception as e:
         logger.exception(e)
         logger.error(msg='Extract raw file failed')
+        raise ValueError
         
 
 def extract_json(filepath:str) -> json:
@@ -46,6 +47,7 @@ def extract_json(filepath:str) -> json:
     except Exception as e:
         logger.exception(e)
         logger.error(msg='Extract json file failed')
+        raise ValueError
         
 @logger_verbose
 def extract(url: str = "https://smn.conagua.gob.mx/webservices/?method=3") -> None:
@@ -63,6 +65,7 @@ def extract(url: str = "https://smn.conagua.gob.mx/webservices/?method=3") -> No
         extract_json(path)
     except:
         logger.error('Extract process failed')
+        raise ValueError
         #logger.error(e)
 
 # if __name__ == '__main__':
