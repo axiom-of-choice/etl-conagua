@@ -49,9 +49,9 @@ with DAG(
     extract_task = PythonOperator(task_id='extract', python_callable=extract)
     generate_table_1_task = PythonOperator(task_id = 'generate_table_1', python_callable=generate_table_1)
     generate_table_2_task = PythonOperator(task_id = 'generate_table_2', python_callable=generate_table_2)
-    load_table_1_task = PythonOperator(task_id = 'load_table_1', python_callable = write_local, op_kwargs={'path':'./airflow/data/processed/process_1/table_1','key':'table_1', 'task_id': 'generate_table_1'})
-    load_table_2_task = PythonOperator(task_id = 'load_table_2', python_callable = write_local, op_kwargs={'path':'./airflow/data/processed/process_2/table_2','key':'table_2', 'task_id': 'generate_table_2'})
-    load_table_2_current_task = PythonOperator(task_id = 'load_table_2_current', python_callable = write_local, op_kwargs={'path':'./airflow/data/processed/process_2/table_2', 'key': 'table_2', 'task_id':'generate_table_2', 'partition':'current'})
+    load_table_1_task = PythonOperator(task_id = 'load_table_1', python_callable = write_local, op_kwargs={'path':'/opt/airflow/data/processed/process_1/table_1','key':'table_1', 'task_id': 'generate_table_1'})
+    load_table_2_task = PythonOperator(task_id = 'load_table_2', python_callable = write_local, op_kwargs={'path':'/opt/airflow/data/processed/process_2/table_2','key':'table_2', 'task_id': 'generate_table_2'})
+    load_table_2_current_task = PythonOperator(task_id = 'load_table_2_current', python_callable = write_local, op_kwargs={'path':'/opt/airflow/data/processed/process_2/table_2', 'key': 'table_2', 'task_id':'generate_table_2', 'partition':'current'})
     clean_xcom=PythonOperator(task_id='clean_xcom', python_callable=cleanup_xcom)
     
     extract_task >> generate_table_1_task 

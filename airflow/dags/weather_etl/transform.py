@@ -4,7 +4,7 @@ from .utils import logger, logger_verbose
 import os
 
 @logger_verbose
-def generate_table_1(ti,path: str = './airflow/data/intermediate/HourlyForecast_MX.json') -> pd.DataFrame:
+def generate_table_1(ti,path: str = '/opt/airflow/data/intermediate/HourlyForecast_MX.json') -> pd.DataFrame:
     '''Generates first table that contains the mean of temperature and precipitation aggregated by state and county 
 
     Args:
@@ -32,7 +32,7 @@ def generate_table_1(ti,path: str = './airflow/data/intermediate/HourlyForecast_
         raise ValueError
 
 @logger_verbose
-def generate_table_2(ti, path:str = './airflow/data/data_municipios') -> pd.DataFrame:
+def generate_table_2(ti, path:str = '/opt/airflow/data/data_municipios') -> pd.DataFrame:
     '''Generates the joined table between aggregated table and local tables
 
     Args:

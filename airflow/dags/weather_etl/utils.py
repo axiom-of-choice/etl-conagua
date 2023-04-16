@@ -19,7 +19,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 logging.basicConfig(
-    filename='./logs/logs.log',
+    filename='/opt/airflow/logs/logs.log',
     level=logging.DEBUG,
     format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
@@ -39,7 +39,7 @@ def logger_verbose(func):
     return wrapper
 
 @logger_verbose
-def remove_staging_files(paths:list = ['./airflow/data/raw', './airflow/data/intermediate']):
+def remove_staging_files(paths:list = ['/opt/airflow/data/raw', '/opt/airflow/data/intermediate']):
     '''Removes all raw and intermediate files used to generate the final tables to avoid duplication
 
     Args:

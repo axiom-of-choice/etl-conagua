@@ -18,10 +18,10 @@ def extract_raw_file(url: str = "https://smn.conagua.gob.mx/webservices/?method=
     try:
         today =  datetime.datetime.today().isoformat()
         ftpstream = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
-        with open(f'./airflow/data/raw/HourlyForecast_MX_{today}.gz', 'wb') as file:
+        with open(f'/opt/airflow/data/raw/HourlyForecast_MX_{today}.gz', 'wb') as file:
             file.write(ftpstream.content)
             logger.info(msg='Extract raw file successful')
-            return f'./airflow/data/raw/HourlyForecast_MX_{today}.gz'
+            return f'/opt/airflow/data/raw/HourlyForecast_MX_{today}.gz'
     except Exception as e:
         logger.exception(e)
         logger.error(msg='Extract raw file failed')
@@ -40,7 +40,7 @@ def extract_json(filepath:str) -> json:
     #today = datetime.date.today().isoformat()
     try:
         with gzip.open(filepath, 'rb') as f_in:
-            with open(f'./airflow/data/intermediate/HourlyForecast_MX.json', 'wb') as f_out:
+            with open(f'/opt/airflow/data/intermediate/HourlyForecast_MX.json', 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
         logger.info(msg='Extract json file successful')
         return 
