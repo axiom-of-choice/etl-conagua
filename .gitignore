@@ -130,3 +130,5 @@ dmypy.json
 
 *.csv
 *.db
+*airflow/airflow.cfg
+project.ipynb
