@@ -46,7 +46,7 @@ Use two different terminals, remember to activate your Python environment and se
     6.1 Start Web server
     ```airflow webserver --port 8080```
     6.2 Start Scheduler
-    airflow scheduler
+    ```airflow scheduler```
 5. Open in your web browser http://localhost:8080/home
 6. Log in into the Airflow web UI user: airflow, password: airflow
 8. Manipulate your airflow.cfg setting ```enable_xcom_pickling = True```
