@@ -128,7 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-*.csv
 *.db
-*airflow/airflow.cfg
+airflow/airflow.cfg
 project.ipynb
+airflow/data/processed
