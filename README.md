@@ -1,10 +1,11 @@
-# reto-data
+# Data Engineering Challenge
+
 ## What is this repo for?
 
 This repository contains a solution to the challenge for the Data Engineer Position.
 
 ## How to use it?
-There are two ways to use the repo
+There are two ways to use the repo:
 
 
 ### Dockerized version
