@@ -131,6 +131,7 @@ dmypy.json
 *.db
 airflow/airflow.cfg
 project.ipynb
-airflow/data/processed
-airflow/data/raw
-airflow/data/intermediate
+airflow/data/processed/process_1/*.csv
+airflow/data/processed/process_2/*.csv
+airflow/data/raw/*.gz
+airflow/data/intermediate/*.json
