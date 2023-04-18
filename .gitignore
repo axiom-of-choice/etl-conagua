@@ -132,3 +132,5 @@ dmypy.json
 airflow/airflow.cfg
 project.ipynb
 airflow/data/processed
+airflow/data/raw
+airflow/data/intermediate
