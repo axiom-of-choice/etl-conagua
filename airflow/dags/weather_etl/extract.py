@@ -6,14 +6,14 @@ import shutil
 from .utils import logger, logger_verbose
 #from utils import logger, logger_verbose
 
-def extract_raw_file(url: str = "https://smn.conagua.gob.mx/webservices/?method=3") -> gzip.GzipFile:
+def extract_raw_file(url: str = "https://smn.conagua.gob.mx/webservices/?method=3") -> str:
     ''' Requests the endpoint and retrieve the file compressed
 
     Args:
         url (str): url of the endpoint. Defaults to "https://smn.conagua.gob.mx/webservices/?method=3"
 
     Returns:
-        gzip.GzipFile: File containing the raw compressed data
+        gzip.GzipFile: Route of the compressed file
     '''
     try:
         today =  datetime.datetime.today().isoformat()
@@ -28,14 +28,14 @@ def extract_raw_file(url: str = "https://smn.conagua.gob.mx/webservices/?method=
         raise ValueError
         
 
-def extract_json(filepath:str) -> json:
+def extract_json(filepath:str) -> None:
     '''Uncompress the data in gzip format and returns a json format
 
     Args:
         filepath (str): Path of the gzip file
 
     Returns:
-        json: Json data format
+        json: Json data format file
     '''
     #today = datetime.date.today().isoformat()
     try:

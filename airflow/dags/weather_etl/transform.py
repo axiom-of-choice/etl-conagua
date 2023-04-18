@@ -4,14 +4,18 @@ from .utils import logger, logger_verbose
 import os
 
 @logger_verbose
-def generate_table_1(ti,path: str = '/opt/airflow/data/intermediate/HourlyForecast_MX.json') -> pd.DataFrame:
-    '''Generates first table that contains the mean of temperature and precipitation aggregated by state and county 
+def generate_table_1(ti,path: str = '/opt/airflow/data/intermediate/HourlyForecast_MX.json') -> None:
+    '''Functions that generates the table for exercise 2 pushing it to the XCOM backend with key table_1
 
     Args:
-        path (str): Path of the json file
+        ti (_type_): Task id to be used with the XCOM backend. LEAVE IT BLANK
+        path (str, optional): Path of the json file to be read. Defaults to '/opt/airflow/data/intermediate/HourlyForecast_MX.json'.
+
+    Raises:
+        ValueError: If fails the execution just for handling purposes
 
     Returns:
-        pd.DataFrame: Table
+        None
     '''
     logger.info('Generating first table')
     try:
@@ -33,14 +37,17 @@ def generate_table_1(ti,path: str = '/opt/airflow/data/intermediate/HourlyForeca
 
 @logger_verbose
 def generate_table_2(ti, path:str = '/opt/airflow/data/data_municipios') -> pd.DataFrame:
-    '''Generates the joined table between aggregated table and local tables
+    '''Functions that generates the table for exercise 3 pushing it to the XCOM backend with key table_2
 
     Args:
-        df (pd.DataFrame): Aggregated table of step 1
-        path (str, optional): Path were local tables are stored. Defaults to './data/data_municipios'.
+        ti (_type_): Task id to be used with the XCOM backend. LEAVE IT BLANK
+        path (str, optional): Path of the json file to be read. Defaults to '/opt/airflow/data/intermediate/HourlyForecast_MX.json'.
+
+    Raises:
+        ValueError: If fails the execution just for handling purposes
 
     Returns:
-        pd.DataFrame: Joined table
+        None
     '''
     logger.info('Generating table 2')
     try:

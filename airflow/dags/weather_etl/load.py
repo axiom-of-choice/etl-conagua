@@ -3,13 +3,17 @@ import datetime
 from .utils import logger, logger_verbose
 
 @logger_verbose
-def write_local(path:str, **kwargs):
-    '''_summary_
+def write_local(path:str, **kwargs) -> int:
+    '''Function that writes the files in the local storage
 
     Args:
-        path (str): _description_
-        df (pd.DataFrame): _description_
-        partition (_type_, optional): _description_. Defaults to datetime.datetime.today().isoformat().
+        path (str): Path to the file be written 
+
+    Raises:
+        ValueError: If the function fails Just for handling  and debug purposes
+
+    Returns:
+        _type_: Exit Code [-1,1]
     '''
     logger.info("Performing writing into local directory")
     try:
@@ -22,5 +26,6 @@ def write_local(path:str, **kwargs):
         logger.error(e)
         logger.error(msg=f'Failed to write table {path}_{partition}.csv')
         raise ValueError
+    return -1
 #def load_postgres():
     
