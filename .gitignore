@@ -135,3 +135,6 @@ airflow/data/processed/process_1/*.csv
 airflow/data/processed/process_2/*.csv
 airflow/data/raw/*.gz
 airflow/data/intermediate/*.json
+airflow/data/data_municipios/.DS_Store
+.gitignore
+airflow/data/data_municipios/20220501/.DS_Store

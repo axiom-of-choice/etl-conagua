@@ -43,7 +43,7 @@ with DAG(
     'weather_dag',
     default_args=default_args,
     description='ETL for the weahter web service',
-    schedule_interval='0 * * * *'
+    schedule_interval='0 * * * *', catchup=False
 ) as dag:
     clean_staging_zone_task = PythonOperator(task_id = 'remove_staging_files', python_callable=remove_staging_files)
     extract_task = PythonOperator(task_id='extract', python_callable=extract)

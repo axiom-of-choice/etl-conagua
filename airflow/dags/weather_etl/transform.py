@@ -51,14 +51,16 @@ def generate_table_2(ti, path:str = '/opt/airflow/data/data_municipios') -> pd.D
     '''
     logger.info('Generating table 2')
     try:
-        latest_data_path = os.listdir(path)[0]
+        paths = [ name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name)) ]
+        latest_data_path = paths[-1]
+        logger.info(f"Joining table 1 with {latest_data_path}")
         # data_mun_1 = pd.read_csv(path + '/data.csv')
         # data_mun_2 = pd.read_csv(path + '/data_1.csv')
         # data_mun = pd.concat([data_mun_1,data_mun_2])
         # del(data_mun_1)
         # del(data_mun_2)
         df = ti.xcom_pull(key="table_1", task_ids = "generate_table_1")
-        data_mun = pd.read_csv(f'{path}/{latest_data_path}')
+        data_mun = pd.read_csv(f'{path}/{latest_data_path}/data.csv')
         table_3 = pd.merge(left=df, right=data_mun, how='inner', left_on=['ides', 'idmun'], right_on=['Cve_Ent', 'Cve_Mun'])
         table_3.drop(['Cve_Ent', 'Cve_Mun'], axis=1, inplace=True)
         logger.info(msg='Table 2 successfuly generated')
