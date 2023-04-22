@@ -18,41 +18,6 @@ There are two ways to use the repo:
 7. Everything is setup 
 
 
-### Local version
-1. Download the tag called: v1.0.0-local that has everything to start using it
-2. Locate yout terminals in the root folder of this repository
-3. Setup and enter a virtual environment 
-    ```python -m venv venv
-     source venv/bin/activate
-     ```
-4. Set AIRFLOW_HOME
-    ```export AIRFLOW_HOME=`pwd`/airflow```
-5. Install requirements.txt ```pip install -r requirements.txt```
-4. Execute  ```sudo docker-compose up -d```
-5. Initialise a Database with an user
-```
-airflow db init
-
-airflow users create \
-    --username airflow \
-    --firstname Peter \
-    --lastname Parker \
-    --role Admin \
-    --password airflow \
-    --email spiderman@superhero.org
-
-```
-6. Start the services
-Use two different terminals, remember to activate your Python environment and set the environment variables!
-    6.1 Start Web server
-    ```airflow webserver --port 8080```
-    6.2 Start Scheduler
-    ```airflow scheduler```
-5. Open in your web browser http://localhost:8080/home
-6. Log in into the Airflow web UI user: airflow, password: airflow
-8. Manipulate your airflow.cfg setting ```enable_xcom_pickling = True```
-7. Everything is setup 
-
 ## About the Solution
 I used Pandas as data manipulation layer because it offers a complete solution to the required tasks, Airflow as a pipeline orchestrator and standard python libraries to request an uncompress the data
 ### File structure
