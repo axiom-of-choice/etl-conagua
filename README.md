@@ -2,7 +2,12 @@
 
 ## What is this repo for?
 
-This repository contains a solution to the challenge for the Data Engineer Position.
+This repository contains a solution to the challenge for the Data Engineer Position consisting of an ETL process using Airflow in a Docker container:
+1. Request the follwing endpoint to download information about weather foerecast in Mexico per hour by municipality: https://smn.conagua.gob.mx/es/webservices/?method=3 each hour
+2. Generate a table that has the average temperature and precipitation by municipality of the last two hours, versioned by datetime of execution truncated to minutes
+3. Generate a joined table between the first generated table and the latest pre-computed data (data_municipios) versioned by datetime of execution truncated to minutes
+4. Load the data (actually write the data in the local storage)
+
 
 ## How to use it?
 
