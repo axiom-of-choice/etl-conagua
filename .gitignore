@@ -129,7 +129,6 @@ dmypy.json
 .pyre/
 
 *.db
-airflow/airflow.cfg
 project.ipynb
 airflow/data/processed/process_1/*.csv
 airflow/data/processed/process_2/*.csv
