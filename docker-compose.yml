@@ -6,7 +6,7 @@ x-common:
   image: apache/airflow:2.3.0
   user: "${AIRFLOW_UID}:0"
   env_file: 
-    - .env
+    - example.env
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/logs:/opt/airflow/logs
@@ -34,7 +34,7 @@ services:
       interval: 5s
       retries: 5
     env_file:
-      - .env
+      - example.env
 
   scheduler:
     <<: [*common, *depends-on]
