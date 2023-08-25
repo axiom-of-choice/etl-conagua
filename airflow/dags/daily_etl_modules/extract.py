@@ -2,10 +2,16 @@ import requests
 import gzip
 import datetime
 import shutil
-from .utils import logger, logger_verbose
+from utils import logger, logger_verbose
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_URL = os.environ['CONAGUA_API']
 #from utils import logger, logger_verbose
 
-def extract_raw_file(url: str = "https://smn.conagua.gob.mx/webservices/?method=3") -> str:
+def extract_raw_file(url: str = API_URL) -> gzip.GzipFile:
     ''' Requests the endpoint and retrieve the file compressed
 
     Args:
@@ -15,17 +21,18 @@ def extract_raw_file(url: str = "https://smn.conagua.gob.mx/webservices/?method=
         gzip.GzipFile: Route of the compressed file
     '''
     try:
-        today =  datetime.datetime.today().isoformat()
+        # today =  datetime.datetime.today().isoformat()
         ftpstream = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
-        with open(f'/opt/airflow/data/raw/HourlyForecast_MX_{today}.gz', 'wb') as file:
-            file.write(ftpstream.content)
-            logger.info(msg='Extract raw file successful')
-            return f'/opt/airflow/data/raw/HourlyForecast_MX_{today}.gz'
+        # with open(f'/opt/airflow/data/raw/HourlyForecast_MX_{today}.gz', 'wb') as file:
+        #     file.write(ftpstream.content)
+        #     logger.info(msg='Extract raw file successful')
+        #     return f'/opt/airflow/data/raw/HourlyForecast_MX_{today}.gz'
     except Exception as e:
         logger.exception(e)
         logger.error(msg='Extract raw file failed')
         raise ValueError
         
+    return ftpstream.content
 
 def extract_json(filepath:str) -> None:
     '''Uncompress the data in gzip format and returns a json format
