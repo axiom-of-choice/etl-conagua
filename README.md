@@ -40,7 +40,7 @@ The file directory follows and standard etl pipeline structure, we have:
     - Airflow config files.: *aiflow.cfg, airflow.db, webserver_config.py*
 * */scripts* Bash scripts
 * */Tests* Unit testing
-* *.env* file
+* *example.env* file
 * *requirements.txt* File
 * *docker-compose.yml* File
 * */example_data* Contains some sample executions
