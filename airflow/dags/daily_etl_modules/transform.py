@@ -72,6 +72,7 @@ def generate_table_2(ti, path:str = '/opt/airflow/data/data_municipios') -> pd.D
         logger.error(msg='Table 2 failed')
         raise ValueError
 
+
 # def transform(path: str = './data/intermediate/HourlyForecast_MX.json') -> pd.DataFrame:
 #     '''Wrapper that generates both tables
 # 
