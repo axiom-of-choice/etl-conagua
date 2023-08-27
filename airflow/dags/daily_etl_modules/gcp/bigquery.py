@@ -20,15 +20,16 @@ class BigQueryConnector(bigquery.Client):
             self.client = bigquery.Client(project=project_id)
         self.client = bigquery.Client(project=project_id, credentials=sa_location)
         self.sa_location = sa_location
-        # self.dataset_ref = self.client.dataset(self.dataset_id)
-        # self.table_ref = self.dataset_ref.table(self.table_id)
-        # self.table = self.client.get_table(self.table_ref)
+        
+        
     def ingest_dataframe(self, data: Any, schema: List[bigquery.SchemaField], table_id: str, partition_date: Optional[str] = None, params : Optional[Dict[str,str]] = None) -> None:
         job_config = bigquery.LoadJobConfig()
         job_config.autodetect = False
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
         job_config.time_partitioning = bigquery.TimePartitioning(field=partition_date)
         job_config.schema = schema
+        origin_schema = self.client.get_table(self.dataset_id + '.' + table_id).schema
+        logger.info(f'Origin schema: {origin_schema}')
         self.logger.info(f'Ingesting dataframe to {self.dataset_id}.{table_id}')
         job = self.client.load_table_from_dataframe(data, self.dataset_id + '.' + table_id, job_config=job_config, **params)
         job.result()
