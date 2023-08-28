@@ -6,6 +6,7 @@ import datetime
 logger = logging.getLogger("logging application")
 logger.setLevel(logging.DEBUG)
 from pathlib import Path
+from inspect import getargs
 
 BASE_PAHT = Path(__file__).resolve().parent
 
@@ -59,3 +60,16 @@ def validate_date(date_text):
             datetime.date.fromisoformat(date_text)
         except ValueError:
             raise ValueError("Incorrect data format, should be YYYY-MM-DD")
+
+
+def allow_kwargs(func):
+    argspec = getargs(func)
+    # if the original allows kwargs then do nothing
+    if  argspec.keywords:
+        return func
+    @wraps(func)
+    def newfoo(*args, **kwargs):
+        #print "newfoo called with args=%r kwargs=%r"%(args,kwargs)
+        some_args = dict((k,kwargs[k]) for k in argspec.args if k in kwargs) 
+        return func(*args, **some_args)
+    return newfoo

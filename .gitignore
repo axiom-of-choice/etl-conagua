@@ -138,3 +138,4 @@ airflow/data/data_municipios/.DS_Store
 .gitignore
 airflow/data/data_municipios/20220501/.DS_Store
 .env
+bq_sa.json
