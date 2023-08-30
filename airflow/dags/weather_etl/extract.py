@@ -3,11 +3,11 @@ import gzip
 import datetime
 import shutil
 from .utils import logger, logger_verbose
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import os
 
-load_dotenv()
-API_URL = os.environ['CONAGUA_API']
+#load_dotenv()
+API_URL = os.environ['CONAGUA_API_HOURLY']
 #from utils import logger, logger_verbose
 
 def extract_raw_file(url: str = API_URL) -> str:
