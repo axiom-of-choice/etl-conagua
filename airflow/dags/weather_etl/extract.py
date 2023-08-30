@@ -1,16 +1,20 @@
 import requests
 import gzip
 import datetime
-import json
 import shutil
 from .utils import logger, logger_verbose
+#from dotenv import load_dotenv
+import os
+
+#load_dotenv()
+API_URL = os.environ['CONAGUA_API_HOURLY']
 #from utils import logger, logger_verbose
 
-def extract_raw_file(url: str = "https://smn.conagua.gob.mx/webservices/?method=3") -> str:
+def extract_raw_file(url: str = API_URL) -> str:
     ''' Requests the endpoint and retrieve the file compressed
 
     Args:
-        url (str): url of the endpoint. Defaults to "https://smn.conagua.gob.mx/webservices/?method=3"
+        url (str): url of the endpoint. Defaults to "https://smn.conagua.gob.mx/tools/GUI/webservices/?method=1"
 
     Returns:
         gzip.GzipFile: Route of the compressed file
@@ -50,11 +54,11 @@ def extract_json(filepath:str) -> None:
         raise ValueError
         
 @logger_verbose
-def extract(url: str = "https://smn.conagua.gob.mx/webservices/?method=3") -> None:
+def extract(url: str = API_URL) -> None:
     '''Wrapper that extracts data from endpoint and converts the gzip into json format 
 
     Args:
-        url (_type_, optional): Endpoint url. Defaults to "https://smn.conagua.gob.mx/webservices/?method=3".
+        url (_type_, optional): Endpoint url. Defaults to "https://smn.conagua.gob.mx/tools/GUI/webservices/?method=1".
 
     Returns:
         json: Data in Json format

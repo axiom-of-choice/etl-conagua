@@ -24,7 +24,7 @@ default_args = {
     'schedule_interval': '*/5 * * * *',
     'provide_context': True,
     'catchup': False,
-    'end_date': datetime.datetime(2023, 5, 16)
+    #'end_date': datetime.datetime(2023, 10, 16) Never ends
 }
 
 
