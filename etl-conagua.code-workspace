@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"terminal.integrated.env.osx": {
+			"PYTHONPATH": "${workspaceFolder}/airflow",
+			"PATH": "${workspaceFolder};${workspaceFolder}/airflow/dags;${env:PYTHONPATH}; ${env:PATH}"
+		}
+	}
+}

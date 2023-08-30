@@ -2,3 +2,7 @@ apache-airflow==2.5.3
 pandas==2.0.0
 requests==2.28.2
 python-dotenv
+boto3
+google-cloud-bigquery
+jsonformatter
+pyarrow
