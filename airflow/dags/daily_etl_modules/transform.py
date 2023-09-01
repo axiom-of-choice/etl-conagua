@@ -4,7 +4,7 @@ from .utils import logger, logger_verbose
 import os
 
 @logger_verbose
-def generate_table_1(ti,path: str = '/opt/airflow/data/intermediate/HourlyForecast_MX.json') -> None:
+def generate_table_1(path: str) -> None:
     '''Functions that generates the table for exercise 2 pushing it to the XCOM backend with key table_1
 
     Args:
@@ -20,16 +20,15 @@ def generate_table_1(ti,path: str = '/opt/airflow/data/intermediate/HourlyForeca
     logger.info('Generating first table')
     try:
         df = pd.read_json(path)
-        df[['fecha', 'hora']] = df['hloc'].str.split('T', expand=True)
+        df[['fecha', 'hora']] = df['dloc'].str.split('T', expand=True)
         df['fecha'] = pd.to_datetime(df['fecha'])
         df['hora'] = df['hora'].astype('int')
         table_1 = df[(df['fecha'] == datetime.date.today().isoformat()) & 
             (abs(df['hora'] - datetime.datetime.today().hour) < 3) & 
-            (df['hora'] < datetime.datetime.today().hour)].groupby(['ides', 'idmun'])[['temp', 'prec']].mean()
+            (df['hora'] < datetime.datetime.today().hour)].groupby(['ides', 'idmun', 'nes', 'nmun'])[['tmax','tmin', 'prec']].mean()
         table_1 = table_1.reset_index() 
         logger.info('Table 1 succesfully generated')
-        ti.xcom_push(key = 'table_1', value = table_1)
-        logger.info(df)
+        return table_1
     except Exception as e:
         logger.exception(e)
         logger.error(msg='Table 1 failed')

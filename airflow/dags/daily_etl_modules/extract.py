@@ -1,10 +1,7 @@
 import requests
 import gzip
-import boto3
-import shutil
 import os
 from dotenv import load_dotenv
-from typing import Any, Optional
 import logging
 logger = logging.getLogger(__name__)
 
