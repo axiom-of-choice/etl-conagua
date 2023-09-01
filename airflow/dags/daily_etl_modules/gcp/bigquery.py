@@ -1,14 +1,10 @@
-import datetime
-from dags.utils import logger_verbose, validate_date
 from typing import Any, Optional
-import os
+from utils import BQ_PD_DATA_MAPPER
 import logging
-import datetime
 
 
 from google.cloud import bigquery
-import pandas
-import pytz
+import pandas as pd
 from typing import List, Dict, Any, Optional
 
 class BigQueryConnector(bigquery.Client):
@@ -20,20 +16,36 @@ class BigQueryConnector(bigquery.Client):
             self.client = bigquery.Client(project=project_id)
         self.client = bigquery.Client(project=project_id, credentials=sa_location)
         self.sa_location = sa_location
+    
+    def _validate_dataframe_schema(self, schema: List[bigquery.SchemaField], dataframe: pd.DataFrame) -> bool:
+        if len(schema) != len(dataframe.columns):
+            self.logger.error(f'Length of schema ({len(schema)}) is different than length of dataframe ({len(dataframe.columns)})')
+            return False
+        for i,column in enumerate(schema):
+            if column.name != dataframe.columns[i]: ## Maybe not needed just the field type
+                self.logger.error(f'Column {column.name} in schema is different than column {dataframe.columns[i]} in dataframe')
+                return False
+            if BQ_PD_DATA_MAPPER[column.field_type] != dataframe.dtypes[i]:
+                self.logger.error(f'Column {column.name} in schema is of type {column.field_type} but column {dataframe.columns[i]} in dataframe is of type {dataframe.dtypes[i].name.upper()}')
+                return False
+        self.logger.info(f'Schema validation passed')
+        return True
         
-        
-    def ingest_dataframe(self, data: Any, schema: List[bigquery.SchemaField], table_id: str, partition_date: Optional[str] = None, params : Optional[Dict[str,str]] = None) -> None:
+    def ingest_dataframe(self, data: Any, table_id: str, partition_date: Optional[str] = None, params : Optional[Dict[str,str]] = None) -> None:
         job_config = bigquery.LoadJobConfig()
         job_config.autodetect = False
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
         job_config.time_partitioning = bigquery.TimePartitioning(field=partition_date)
-        job_config.schema = schema
         origin_schema = self.client.get_table(self.dataset_id + '.' + table_id).schema
         logger.info(f'Origin schema: {origin_schema}')
         self.logger.info(f'Ingesting dataframe to {self.dataset_id}.{table_id}')
-        job = self.client.load_table_from_dataframe(data, self.dataset_id + '.' + table_id, job_config=job_config, **params)
-        job.result()
-        self.logger.info(f'Ingestion of {len(data)} rows to {self.dataset_id}.{table_id} completed')
+        if self._validate_dataframe_schema(origin_schema, data):
+            job = self.client.load_table_from_dataframe(data, self.dataset_id + '.' + table_id, job_config=job_config, **params)
+            job.result()
+            self.logger.info(f'Ingestion of {len(data)} rows to {self.dataset_id}.{table_id} completed')
+        else:
+            self.logger.error(f'Ingestion of {len(data)} rows to {self.dataset_id}.{table_id} failed')
+            raise ValueError('Schema validation failed')
 
 
 if __name__ == '__main__':
@@ -63,5 +75,5 @@ if __name__ == '__main__':
     from dotenv import load_dotenv
     load_dotenv()
     bq = BigQueryConnector('orbital-craft-397002', 'conagua_data')
-    bq.ingest_dataframe(pandas.DataFrame({'test': [1,2,3], "asd":"asd"}), [{'name': 'test', 'type': 'INTEGER'}], 'conagua_data', params={'timeout': 1000})
+    bq.ingest_dataframe(pd.DataFrame({'test': [1,2,3], "asd":1}), 'conagua_data', params={'timeout': 1000})
     
