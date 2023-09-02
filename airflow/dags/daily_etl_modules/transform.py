@@ -1,19 +1,16 @@
 import pandas as pd
 import datetime
 from .utils import logger, logger_verbose
-import os
+import logging
+logger = logging.getLogger(__name__)
 
 @logger_verbose
-def generate_table_1(path: str) -> None:
+def generate_table_1(path: str) -> pd.Data:
     '''Functions that generates the table for exercise 2 pushing it to the XCOM backend with key table_1
-
     Args:
-        ti (_type_): Task id to be used with the XCOM backend. LEAVE IT BLANK
-        path (str, optional): Path of the json file to be read. Defaults to '/opt/airflow/data/intermediate/HourlyForecast_MX.json'.
-
+        path (str, optional): Path of the file in S3 to transform
     Raises:
         ValueError: If fails the execution just for handling purposes
-
     Returns:
         None
     '''
@@ -35,11 +32,10 @@ def generate_table_1(path: str) -> None:
         raise ValueError
 
 @logger_verbose
-def generate_table_2(ti, path:str = '/opt/airflow/data/data_municipios') -> pd.DataFrame:
+def generate_table_2(df:pd.DataFrame, df1: pd.DataFrame) -> pd.DataFrame:
     '''Functions that generates the table for exercise 3 pushing it to the XCOM backend with key table_2
 
     Args:
-        ti (_type_): Task id to be used with the XCOM backend. LEAVE IT BLANK
         path (str, optional): Path of the json file to be read. Defaults to '/opt/airflow/data/intermediate/HourlyForecast_MX.json'.
 
     Raises:
@@ -50,25 +46,14 @@ def generate_table_2(ti, path:str = '/opt/airflow/data/data_municipios') -> pd.D
     '''
     logger.info('Generating table 2')
     try:
-        paths = [ name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name)) ]
-        latest_data_path = paths[-1]
-        logger.info(f"Joining table 1 with {latest_data_path}")
-        # data_mun_1 = pd.read_csv(path + '/data.csv')
-        # data_mun_2 = pd.read_csv(path + '/data_1.csv')
-        # data_mun = pd.concat([data_mun_1,data_mun_2])
-        # del(data_mun_1)
-        # del(data_mun_2)
-        df = ti.xcom_pull(key="table_1", task_ids = "generate_table_1")
-        data_mun = pd.read_csv(f'{path}/{latest_data_path}/data.csv')
+        data_mun = pd.read_csv(df1)
         table_3 = pd.merge(left=df, right=data_mun, how='inner', left_on=['ides', 'idmun'], right_on=['Cve_Ent', 'Cve_Mun'])
         table_3.drop(['Cve_Ent', 'Cve_Mun'], axis=1, inplace=True)
         logger.info(msg='Table 2 successfuly generated')
         logger.info(table_3)
-        #return table_3
-        ti.xcom_push(key = 'table_2', value = table_3)
     except Exception as e:
-        logger.exception(e)
         logger.error(msg='Table 2 failed')
+        logger.exception(e)
         raise ValueError
 
 

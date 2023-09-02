@@ -10,8 +10,6 @@ s3 = S3_Connector(os.environ['S3_ACCESS_KEY_ID'], os.environ['S3_SECRET_ACCESS_K
 
 def load_to_s3(file: gzip.GzipFile, bucket: str = os.environ['S3_BUCKET'], key: str = 'HourlyForecast_MX.json.gz') -> None:
     s3.upload_s3(bucket=bucket, obj=file, key=key)
-    
-def load_table_1()
 
 if __name__ == '__main__':
     load_dotenv()
