@@ -3,9 +3,9 @@ import datetime
 from .utils import logger, logger_verbose
 import logging
 logger = logging.getLogger(__name__)
+from typing import Any
 
-@logger_verbose
-def generate_table_1(path: str) -> pd.DataFrame:
+def generate_table_1(json_file: Any) -> pd.DataFrame:
     '''Functions that generates the table for exercise 2 pushing it to the XCOM backend with key table_1
     Args:
         path (str, optional): Path of the file in S3 to transform
@@ -16,7 +16,7 @@ def generate_table_1(path: str) -> pd.DataFrame:
     '''
     logger.info('Generating first table')
     try:
-        df = pd.read_json(path)
+        df = pd.read_json(json_file)
         df[['fecha', 'hora']] = df['dloc'].str.split('T', expand=True)
         df['fecha'] = pd.to_datetime(df['fecha'])
         df['hora'] = df['hora'].astype('int')
@@ -31,7 +31,6 @@ def generate_table_1(path: str) -> pd.DataFrame:
         logger.error(msg='Table 1 failed')
         raise ValueError
 
-@logger_verbose
 def generate_table_2(df:pd.DataFrame, df1: pd.DataFrame) -> pd.DataFrame:
     '''Functions that generates the table for exercise 3 pushing it to the XCOM backend with key table_2
 

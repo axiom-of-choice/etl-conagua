@@ -1,6 +1,5 @@
 from google.cloud import bigquery
 import inspect
-import pandas as pd
 
 attr = inspect.getmembers(bigquery.enums.SqlTypeNames, lambda a:not(inspect.isroutine(a)))
 attrs = [a for a in attr if not(a[0].startswith('__') and a[0].endswith('__') or a[0] in ('name', 'value'))]
@@ -24,7 +23,7 @@ BQ_PD_DATA_MAPPER = {
     "DATE": "datetime64[ns]",
     "TIME": "datetime64[ns]",
     "DATETIME": "datetime64[ns]",
-    "INTERVAL": "object",
+    "INTERVAL": "object"
 }
 
 if __name__ == "__main__":

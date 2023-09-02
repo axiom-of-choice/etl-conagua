@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from utils import BQ_PD_DATA_MAPPER
+from .utils import BQ_PD_DATA_MAPPER
 import logging
 
 
