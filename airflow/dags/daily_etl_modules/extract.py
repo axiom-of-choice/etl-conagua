@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import logging
 logger = logging.getLogger(__name__)
 import pandas as pd
+from aws.s3 import S3_Connector
 
 load_dotenv()
 
@@ -30,8 +31,6 @@ def extract_raw_file(url: str = API_URL) -> gzip.GzipFile:
     logger.info(msg='Request successful')
     return ftpstream.content
 
-def extract_json_file(s3_path: str)-> pd.DataFrame:
-    
 
 if __name__ == '__main__':
     import logging

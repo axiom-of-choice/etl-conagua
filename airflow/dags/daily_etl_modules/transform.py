@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 @logger_verbose
-def generate_table_1(path: str) -> pd.Data:
+def generate_table_1(path: str) -> pd.DataFrame:
     '''Functions that generates the table for exercise 2 pushing it to the XCOM backend with key table_1
     Args:
         path (str, optional): Path of the file in S3 to transform
@@ -46,7 +46,7 @@ def generate_table_2(df:pd.DataFrame, df1: pd.DataFrame) -> pd.DataFrame:
     '''
     logger.info('Generating table 2')
     try:
-        data_mun = pd.read_csv(df1)
+        data_mun = df1
         table_3 = pd.merge(left=df, right=data_mun, how='inner', left_on=['ides', 'idmun'], right_on=['Cve_Ent', 'Cve_Mun'])
         table_3.drop(['Cve_Ent', 'Cve_Mun'], axis=1, inplace=True)
         logger.info(msg='Table 2 successfuly generated')
