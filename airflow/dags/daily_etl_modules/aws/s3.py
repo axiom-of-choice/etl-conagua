@@ -6,6 +6,7 @@ import logging
 import datetime
 today = datetime.datetime.today().date().isoformat()
 import json
+import gzip
 
 class S3_Connector:
     logger = logging.getLogger(__name__)
@@ -33,8 +34,9 @@ class S3_Connector:
         else:
             self.logger.info(f'Downloading file {file_name} from s3 bucket {bucket}')
             s3_response_object = self.s3_client.get_object(Bucket=bucket, Key=f'{file_name}')
-            object_content = s3_response_object['Body'].read()
-        object_content = json.loads(json.loads(object_content.decode('utf-8')))
+            object_content = s3_response_object['Body']
+        object_content = gzip.decompress(object_content)
+        object_content = json.loads(object_content)
         return object_content
     
     def upload_s3(self, bucket: str, obj: Any, key: str ='HourlyForecast_MX.gz', partition_date: Optional[str]=today) -> None:
@@ -83,5 +85,5 @@ if __name__ == '__main__':
     load_dotenv()
     s3_client = S3_Connector(os.environ['S3_ACCESS_KEY_ID'], os.environ['S3_SECRET_ACCESS_KEY'])
     file = s3_client.download_s3_json(partition_date='2023-09-02', bucket=os.environ["S3_BUCKET"], file_name="HourlyForecast_MX.gz")
-    print(type(file))
+    print(file)
     
