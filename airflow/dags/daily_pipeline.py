@@ -5,10 +5,12 @@ from airflow.operators.python import PythonOperator
 import datetime
 from datetime import timedelta
 from airflow.models import DAG
+from airflow.providers.amazon.aws.operators.s3 import S3CreateObjectOperator, S3Hook
+from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
 from daily_etl_modules.aws.s3 import S3_Connector
 from daily_etl_modules.gcp.bigquery import BigQueryConnector
 import os
-from daily_etl_modules.extract import extract_process
+from daily_etl_modules.extract import _extract_raw_file, extract_process
 from daily_etl_modules.transform import generate_table_1, generate_table_2
 
 
@@ -61,7 +63,7 @@ with DAG(
     schedule_interval='0 * * * *', catchup=False
 ) as dag:
     extract_task = PythonOperator(task_id='extract', python_callable=extract_process, op_kwargs={'url': os.environ['CONAGUA_API'], 's3_client': s3})
-    generate_table_1_task = PythonOperator(task_id = 'generate_table_1', python_callable=generate_table_1, op_kwargs={'json_file':s3.download_s3_json(bucket=bucket, key=filename, obj='HourlyForecast_MX.json')})
+    generate_table_1_task = PythonOperator(task_id = 'generate_table_1', python_callable=generate_table_1, op_kwargs={'json_file':s3.download_s3_json(bucket=bucket, file_name=filename)})
     
     #generate_table_2_task = PythonOperator(task_id = 'generate_table_2', python_callable=generate_table_2, op_kwargs={}).execute_callable()
     #load_table_1_task = PythonOperator(task_id = 'load_table_1', python_callable = write_local, op_kwargs={'path':'/opt/airflow/data/processed/process_1/table_1','key':'table_1', 'task_id': 'generate_table_1'})
@@ -73,3 +75,14 @@ with DAG(
     #generate_table_2_task >> load_table_2_task >> load_table_2_current_task >> clean_staging_zone_task
     #clean_staging_zone_task >> clean_xcom
 
+
+with DAG(
+    'daily_pipeline_dag_built-in_operators',
+    default_args=default_args,
+    description='ETL for the weather daily web service',
+    schedule_interval='0 * * * *', catchup=False
+) as dag_test:
+    #extract_task = PythonOperator(task_id='extract', python_callable=_extract_raw_file, op_kwargs={'url': os.environ['CONAGUA_API']})
+    upload_s3_task = S3CreateObjectOperator(s3_bucket=bucket,s3_key="{{ds}}/HourlyForecast_MX.gz", task_id='upload_s3', data=_extract_raw_file(os.environ['CONAGUA_API']), aws_conn_id='AWS', replace=True)
+    
+    
