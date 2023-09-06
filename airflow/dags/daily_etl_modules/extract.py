@@ -1,19 +1,17 @@
 import requests
 import gzip
-import boto3
-import shutil
 import os
 from dotenv import load_dotenv
-from typing import Any, Optional
 import logging
 logger = logging.getLogger(__name__)
+from daily_etl_modules.aws.s3 import S3_Connector
 
 load_dotenv()
 
 API_URL = os.environ['CONAGUA_API']
 #from utils import logger, logger_verbose
 
-def extract_raw_file(url: str = API_URL) -> gzip.GzipFile:
+def _extract_raw_file(url: str = API_URL) -> gzip.GzipFile:
     ''' Requests the endpoint and retrieve the file compressed
 
     Args:
@@ -31,6 +29,13 @@ def extract_raw_file(url: str = API_URL) -> gzip.GzipFile:
         raise ValueError
     logger.info(msg='Request successful')
     return ftpstream.content
+
+def extract_process(s3_client: S3_Connector, url: str = API_URL) -> None:
+    ''' Requests the endpoint and uplaods the file to S3 bucket'''
+    try:
+        s3_client.upload_s3(bucket=os.environ['S3_BUCKET'], obj=_extract_raw_file(url), key='HourlyForecast_MX.gz')
+    except Exception as e:
+        logger.exception(e)
 
 if __name__ == '__main__':
     import logging
@@ -56,5 +61,5 @@ if __name__ == '__main__':
 
     logger.addHandler(logHandler)
 
-    file = extract_raw_file()
+    file = _extract_raw_file()
     print(type(file))
