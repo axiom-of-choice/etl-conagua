@@ -86,4 +86,3 @@ if __name__ == '__main__':
     s3_client = S3_Connector(os.environ['S3_ACCESS_KEY_ID'], os.environ['S3_SECRET_ACCESS_KEY'])
     file = s3_client.download_s3_json(partition_date='2023-09-02', bucket=os.environ["S3_BUCKET"], file_name="HourlyForecast_MX.gz")
     print(file)
-    
