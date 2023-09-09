@@ -74,7 +74,7 @@ query_aggregate = """
           idmun
         """
         
-che
+
 ####
 
 

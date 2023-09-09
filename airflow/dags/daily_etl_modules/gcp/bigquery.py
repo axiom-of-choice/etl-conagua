@@ -54,6 +54,7 @@ class BigQueryConnector(bigquery.Client):
         origin_schema = self.client.get_table(self.dataset_id + '.' + table_id).schema
         self.logger.info(f'Ingesting dataframe to {self.dataset_id}.{table_id}')
         data = self._enforce_dataframe_schema(origin_schema, data)
+        partition_date = data[partition_field].unique()[0]
         job = self.client.load_table_from_dataframe(data, self.dataset_id + '.' + table_id, job_config=job_config)
         job.result()
         self.logger.info(f'Ingestion of {len(data)} rows to {self.dataset_id}.{table_id} completed')

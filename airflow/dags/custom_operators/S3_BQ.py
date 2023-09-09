@@ -7,7 +7,7 @@ import pandas as pd
 import datetime as dt
 
 class S3ToBigQuery(BaseOperator):
-    def __init__(self, s3_client: S3_Connector, bq_client:BigQueryConnector, bucket :str, bq_table: str, filename: str, file_prefix: Optional[str] = None, transformation: Optional[callable] = None, *args, **kwargs):
+    def __init__(self, s3_client: S3_Connector, bq_client:BigQueryConnector, bucket :str, bq_table: str, filename: str, file_prefix: Optional[str] = None, transformation: Optional[callable] = None, partition_field: Optional[str]='load_date',*args, **kwargs):
         super().__init__(*args, **kwargs)
         self.s3_client = s3_client
         self.bq_client = bq_client
@@ -16,6 +16,7 @@ class S3ToBigQuery(BaseOperator):
         self.transformation = transformation
         self.file_prefix = file_prefix
         self.bq_table = bq_table
+        self.partition_field = partition_field
         
     def execute(self, context: Context) -> Any:
         if self.file_prefix is not None:
@@ -28,7 +29,7 @@ class S3ToBigQuery(BaseOperator):
         else:
             transformed_file = pd.DataFrame(file)
         transformed_file['load_date'] = self.file_prefix
-        self.bq_client.ingest_dataframe(data=transformed_file, table_id=self.bq_table, partition_field='load_date')
+        self.bq_client.ingest_dataframe(data=transformed_file, table_id=self.bq_table, partition_field=self.partition_field)
             
         
         
