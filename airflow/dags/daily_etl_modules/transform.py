@@ -15,7 +15,7 @@ def generate_table_1(json_file: Any) -> pd.DataFrame:
     '''
     logger.info('Generating first table')
     try:
-        df = pd.read_json(json_file)
+        df = pd.DataFrame(json_file)
         df[['fecha', 'hora']] = df['dloc'].str.split('T', expand=True)
         df['fecha'] = pd.to_datetime(df['fecha'])
         df['hora'] = df['hora'].astype('int')

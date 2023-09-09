@@ -7,6 +7,7 @@ from datetime import timedelta
 from airflow.models import DAG
 from airflow.providers.amazon.aws.operators.s3 import S3CreateObjectOperator, S3Hook
 from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
+from custom_operators.S3_BQ import S3ToBigQuery
 from daily_etl_modules.aws.s3 import S3_Connector
 from daily_etl_modules.gcp.bigquery import BigQueryConnector
 import os
@@ -53,9 +54,29 @@ default_args = {
 }
 
 s3 = S3_Connector(os.environ['S3_ACCESS_KEY_ID'], os.environ['S3_SECRET_ACCESS_KEY'])
+bq_project = os.environ['GCP_PROJECT']
+bq_dataset = os.environ['BQ_DATASET']
 bq = BigQueryConnector(os.environ['GCP_PROJECT'], os.environ['BQ_DATASET'])
 bucket = os.environ['S3_BUCKET']
+
+###TO-DO: Remove HARCODED 
 filename = 'HourlyForecast_MX.gz'
+query_aggregate = """
+        SELECT
+        MAX(nmun) AS Town,
+        AVG(tmax) AS avg_tmax,
+        AVG(tmin) AS avg_tmin,
+        AVG(prec) AS avg_prec,
+        AVG(velvien) AS avg_velvien
+        FROM
+          `orbital-craft-397002.conagua_data.raw_daily_table`
+        GROUP BY
+          idmun
+        """
+        
+
+####
+
 
 
 with DAG(
@@ -84,11 +105,14 @@ with DAG(
     description='ETL for the weather daily web service',
     schedule_interval='0 * * * *', catchup=False
 ) as dag_test:
-    #extract_task = PythonOperator(task_id='extract', python_callable=_extract_raw_file, op_kwargs={'url': os.environ['CONAGUA_API']})
+    # aggregate_examples = BigQueryExecuteQueryOperator(task_id='aggregate_examples', sql=query, use_legacy_sql=False, gcp_conn_id='GCP',
+    #                                                   destination_dataset_table=f"{bq_project}.{bq_dataset}.aggregated_examples", write_disposition='WRITE_TRUNCATE')
     upload_s3_task = S3CreateObjectOperator(s3_bucket=bucket,s3_key="{{ds}}/" + filename, task_id='upload_s3', data=_extract_raw_file(os.environ['CONAGUA_API']), aws_conn_id='AWS', replace=True)
-    download_s3_file = PythonOperator(task_id='download_s3_file', python_callable=s3.download_s3_json, op_kwargs={'bucket':bucket, 'file_name':filename})#.xcom_push(context="download_s3_file",key='json_file', value='{{ti.xcom_pull(task_ids="upload_s3")}}')
-    generate_table_1_task = PythonOperator(task_id = 'generate_table_1', python_callable=generate_table_1, op_kwargs={'json_file':"{{ti.xcom_pull(task_ids='download_s3_file')}}"})
+    load_raw_table = S3ToBigQuery(s3_client=s3, bq_client=bq, bucket=bucket, bq_table='raw_daily_table', filename=filename, task_id='load_raw_table')
+    aggregate_examples = BigQueryExecuteQueryOperator(task_id='aggregate_examples', sql=query_aggregate, use_legacy_sql=False, gcp_conn_id='GCP',
+                                                      destination_dataset_table=f"{bq_project}.{bq_dataset}.aggregated_examples", write_disposition='WRITE_TRUNCATE')
     
-    upload_s3_task >> download_s3_file >> generate_table_1_task
+    upload_s3_task >> load_raw_table >> aggregate_examples
+
     
     
