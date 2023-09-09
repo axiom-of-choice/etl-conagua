@@ -14,6 +14,7 @@ x-common:
     - ./airflow/plugins:/opt/airflow/plugins
     - /var/run/docker.sock:/var/run/docker.sock
     - ./airflow/airflow.cfg:/opt/airflow/airflow.cfg
+    - ./airflow/queries.toml:/opt/airflow/queries.toml
 
 x-depends-on:
   &depends-on

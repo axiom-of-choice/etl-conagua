@@ -1,0 +1,42 @@
+[base_table]
+creation_query = """
+CREATE TABLE IF NOT EXISTS `orbital-craft-397002.conagua_data.raw_daily_table` 
+(
+  ides INT64 NOT NULL OPTIONS (description = "State ID"),
+  idmun INT64 NOT NULL OPTIONS (description = "Town ID"),
+  nes STRING OPTIONS (description = "State name"),
+  nmun STRING OPTIONS (description = "Town name"),
+  dloc STRING OPTIONS (description = "Local Day (YYYmmddhhmm)"),
+  ndia INT64 OPTIONS (description = "Day number"),
+  tmax FLOAT64 OPTIONS (description = "Max temperature"),
+  tmin FLOAT64 OPTIONS (description = "Min tempeature"),
+  desciel STRING OPTIONS (description = "Sky description"),
+  probprec FLOAT64 OPTIONS (description = "Rain probability"),
+  prec FLOAT64 OPTIONS (description = "Rain in liters/m2"),
+  velvien FLOAT64 OPTIONS (description = "Wind velocity"),
+  dirvienc STRING OPTIONS (description = "Wind direction (cardinal)"),
+  dirvieng FLOAT64 OPTIONS (description = "Wind direction (Degrees)"),
+  cc FLOAT64 OPTIONS (description = "Cloud cover (%)"),
+  lat FLOAT64 OPTIONS (description = "Latitude"),
+  lon FLOAT64 OPTIONS (description = "Longitude"),
+  dh INT64 OPTIONS (description = "Difference between local timezone and UTC"),
+  raf FLOAT64 OPTIONs (description = "TBD"),
+  load_date DATE
+)
+PARTITION BY
+load_date
+"""
+
+[aggregations]
+example_query = """
+        SELECT
+        MAX(nmun) AS Town,
+        AVG(tmax) AS avg_tmax,
+        AVG(tmin) AS avg_tmin,
+        AVG(prec) AS avg_prec,
+        AVG(velvien) AS avg_velvien
+        FROM
+          `orbital-craft-397002.conagua_data.raw_daily_table`
+        GROUP BY
+          idmun
+"""
