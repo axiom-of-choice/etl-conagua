@@ -2,21 +2,21 @@
 
 ## What is this repo for?
 
-This repository contains a solution to the challenge for the Data Engineer Position consisting of an ETL process using Airflow in a Docker container:
-1. Request the follwing endpoint to download information about weather foerecast in Mexico per hour by municipality: https://smn.conagua.gob.mx/tools/GUI/webservices/?method=1 each hour
-2. Generate a table that has the average temperature and precipitation by municipality of the last two hours, versioned by datetime of execution truncated to minutes
-3. Generate a joined table between the first generated table and the latest pre-computed data (data_municipios) versioned by datetime of execution truncated to minutes
-4. Load the data (actually write the data in the local storage)
-
+This repository is a project consisting of an ETL process using Airflow in a Docker container using S3 and BigQuery as storage layers:
+1. Request the follwing endpoint to download information about weather foerecast in Mexico per hour by municipality: https://smn.conagua.gob.mx/tools/GUI/webservices/?method=1 and https://smn.conagua.gob.mx/tools/GUI/webservices/?method=3 each hour
+2. Uploads the Data into S3 Bucket
+3. Generate a table that has the average temperature and precipitation by municipality of the last two hours, versioned by datetime of execution truncated to minutes
+4. Generate a joined table between the first generated table and the latest pre-computed data (data_municipios) versioned by datetime of execution truncated to minutes
+5. Load the data into BigQuery and computes aggregate
 
 ## How to use it?
 
 ### Dockerized version
 **If you're working on Windows I encourage to you use WSL to clone the repository if you don't wanna have problems with the file directory structure because in windows you have to use `\`   insted of `/`**
-1. Clone the repository and checkout the tag called: v1.0.0-docker that has everything to start using it
+1. Clone the repository and checkout the tag called: v1.1.0-docker that has everything to start using it
 2. Install Docker compose on your machine
 3. Locate your terminal in the root folder of the repository
-4. Execute  ```sudo docker-compose up -d```
+4. Execute  ```sudo docker-compose build``` and ```sudo docker-compose up -d```
 5. Open in your web browser http://localhost:8080/home
 6. Log in into the Airflow web UI user: airflow, password: airflow
 7. Everything is setup
