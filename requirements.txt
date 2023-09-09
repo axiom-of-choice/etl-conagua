@@ -9,3 +9,4 @@ pyarrow
 apache-airflow[cncf.kubernetes]
 apache-airflow[google]
 apache-airflow[amazon]
+toml

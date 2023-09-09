@@ -2,7 +2,6 @@ from typing import Any, Optional
 from .utils import BQ_PD_DATA_MAPPER
 import logging
 
-
 from google.cloud import bigquery
 import pandas as pd
 from typing import List, Dict, Any, Optional
@@ -34,11 +33,14 @@ class BigQueryConnector(bigquery.Client):
                 try:
                     self.logger.warning(f'Trying to cast column {dataframe.columns[i]} to type {BQ_PD_DATA_MAPPER[column.field_type]}')
                     dataframe[dataframe.columns[i]] = dataframe[dataframe.columns[i]].astype(BQ_PD_DATA_MAPPER[column.field_type])
+                    # if BQ_PD_DATA_MAPPER[column.field_type] == "DATE":
+                    #     dataframe[dataframe.columns[i]] = dataframe[dataframe.columns[i]].dt.date
                 except Exception as e:
                     self.logger.error(f'Error casting column {dataframe.columns[i]} to type {BQ_PD_DATA_MAPPER[column.field_type]}: {e}')
                     raise ValueError('Schema validation failed')
         self.logger.info(f'Schema validation passed')
         self.logger.info(f'Final schema: {dataframe.dtypes}')
+        # self.logger.debug(f'Final dataframe: {dataframe.head(5)}')
         return dataframe
 
     def _reorder_dataframe(self, schema: List[bigquery.SchemaField], dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -49,13 +51,16 @@ class BigQueryConnector(bigquery.Client):
     def ingest_dataframe(self, data: Any, table_id: str, partition_field: Optional[str] = None, params : Optional[Dict[str,str]] = None) -> None:
         job_config = bigquery.LoadJobConfig()
         job_config.autodetect = False
-        job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND
-        job_config.time_partitioning = bigquery.TimePartitioning(field=partition_field, type_=bigquery.TimePartitioningType.DAY)
+        job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
         origin_schema = self.client.get_table(self.dataset_id + '.' + table_id).schema
+        job_config.time_partitioning = bigquery.TimePartitioning(field=partition_field, type_=bigquery.TimePartitioningType.DAY)
+        job_config.schema = origin_schema
         self.logger.info(f'Ingesting dataframe to {self.dataset_id}.{table_id}')
         data = self._enforce_dataframe_schema(origin_schema, data)
-        partition_date = data[partition_field].unique()[0]
-        job = self.client.load_table_from_dataframe(data, self.dataset_id + '.' + table_id, job_config=job_config)
+        #ACCESS ONLY TO THE FIRST ROW TO GET THE PARTITION DATE
+        partition_date = str(data[partition_field].unique()[0]).replace('-','').replace('T','').replace(':','').split('.')[0][:8]
+        ## WRITES ONYL CURRENT PARTITION
+        job = self.client.load_table_from_dataframe(data, self.dataset_id + '.' + table_id + f"${partition_date}", job_config=job_config)
         job.result()
         self.logger.info(f'Ingestion of {len(data)} rows to {self.dataset_id}.{table_id} completed')
 
