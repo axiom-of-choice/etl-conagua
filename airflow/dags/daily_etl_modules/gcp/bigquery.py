@@ -1,14 +1,9 @@
-import datetime
-from dags.utils import logger_verbose, validate_date
 from typing import Any, Optional
-import os
+from .utils import BQ_PD_DATA_MAPPER
 import logging
-import datetime
-
 
 from google.cloud import bigquery
-import pandas
-import pytz
+import pandas as pd
 from typing import List, Dict, Any, Optional
 
 class BigQueryConnector(bigquery.Client):
@@ -20,18 +15,52 @@ class BigQueryConnector(bigquery.Client):
             self.client = bigquery.Client(project=project_id)
         self.client = bigquery.Client(project=project_id, credentials=sa_location)
         self.sa_location = sa_location
+    
+    def _enforce_dataframe_schema(self, schema: List[bigquery.SchemaField], dataframe: pd.DataFrame) -> bool:
+        if len(schema) != len(dataframe.columns):
+            self.logger.error(f'Length of schema ({len(schema)}) is different than length of dataframe ({len(dataframe.columns)})')
+            raise ValueError('Schema validation failed')
+        if set([column.name for column in schema]) == set(dataframe.columns):
+            self.logger.info(f'Reordering dataframe to match schema')
+            try:
+                dataframe = self._reorder_dataframe(schema, dataframe)
+            except Exception as e:
+                self.logger.error(f'Error reordering dataframe: {e}')
+                raise ValueError('Schema validation failed')
+        for i,column in enumerate(schema):
+            if BQ_PD_DATA_MAPPER[column.field_type] != dataframe.dtypes[i]:
+                self.logger.warning(f'Column {column.name} in schema is of type {column.field_type} but column {dataframe.columns[i]} in dataframe is of type {dataframe.dtypes[i].name.upper()}')
+                try:
+                    self.logger.warning(f'Trying to cast column {dataframe.columns[i]} to type {BQ_PD_DATA_MAPPER[column.field_type]}')
+                    dataframe[dataframe.columns[i]] = dataframe[dataframe.columns[i]].astype(BQ_PD_DATA_MAPPER[column.field_type])
+                    # if BQ_PD_DATA_MAPPER[column.field_type] == "DATE":
+                    #     dataframe[dataframe.columns[i]] = dataframe[dataframe.columns[i]].dt.date
+                except Exception as e:
+                    self.logger.error(f'Error casting column {dataframe.columns[i]} to type {BQ_PD_DATA_MAPPER[column.field_type]}: {e}')
+                    raise ValueError('Schema validation failed')
+        self.logger.info(f'Schema validation passed')
+        self.logger.info(f'Final schema: {dataframe.dtypes}')
+        # self.logger.debug(f'Final dataframe: {dataframe.head(5)}')
+        return dataframe
+
+    def _reorder_dataframe(self, schema: List[bigquery.SchemaField], dataframe: pd.DataFrame) -> pd.DataFrame:
+        cols = [column.name for column in schema]
+        dataframe = dataframe[cols]
+        return dataframe
         
-        
-    def ingest_dataframe(self, data: Any, schema: List[bigquery.SchemaField], table_id: str, partition_date: Optional[str] = None, params : Optional[Dict[str,str]] = None) -> None:
+    def ingest_dataframe(self, data: Any, table_id: str, partition_field: Optional[str] = None, params : Optional[Dict[str,str]] = None) -> None:
         job_config = bigquery.LoadJobConfig()
         job_config.autodetect = False
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
-        job_config.time_partitioning = bigquery.TimePartitioning(field=partition_date)
-        job_config.schema = schema
         origin_schema = self.client.get_table(self.dataset_id + '.' + table_id).schema
-        logger.info(f'Origin schema: {origin_schema}')
+        job_config.time_partitioning = bigquery.TimePartitioning(field=partition_field, type_=bigquery.TimePartitioningType.DAY)
+        job_config.schema = origin_schema
         self.logger.info(f'Ingesting dataframe to {self.dataset_id}.{table_id}')
-        job = self.client.load_table_from_dataframe(data, self.dataset_id + '.' + table_id, job_config=job_config, **params)
+        data = self._enforce_dataframe_schema(origin_schema, data)
+        #ACCESS ONLY TO THE FIRST ROW TO GET THE PARTITION DATE
+        partition_date = str(data[partition_field].unique()[0]).replace('-','').replace('T','').replace(':','').split('.')[0][:8]
+        ## WRITES ONYL CURRENT PARTITION
+        job = self.client.load_table_from_dataframe(data, self.dataset_id + '.' + table_id + f"${partition_date}", job_config=job_config)
         job.result()
         self.logger.info(f'Ingestion of {len(data)} rows to {self.dataset_id}.{table_id} completed')
 
@@ -63,5 +92,5 @@ if __name__ == '__main__':
     from dotenv import load_dotenv
     load_dotenv()
     bq = BigQueryConnector('orbital-craft-397002', 'conagua_data')
-    bq.ingest_dataframe(pandas.DataFrame({'test': [1,2,3], "asd":"asd"}), [{'name': 'test', 'type': 'INTEGER'}], 'conagua_data', params={'timeout': 1000})
+    bq.ingest_dataframe(pd.DataFrame({'test': [1,2,3], "asd":1}), 'conagua_data', params={'timeout': 1000})
     
