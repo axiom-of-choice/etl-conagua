@@ -3,7 +3,8 @@ import gzip
 import datetime
 import shutil
 from .utils import logger, logger_verbose
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
+load_dotenv()
 import os
 
 #load_dotenv()
