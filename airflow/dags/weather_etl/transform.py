@@ -1,9 +1,9 @@
 import pandas as pd
 import datetime
-from .utils import logger, logger_verbose
+import logging
+logger = logging.getLogger(__name__)
 import os
 
-@logger_verbose
 def generate_table_1(ti,path: str = '/opt/airflow/data/intermediate/HourlyForecast_MX.json') -> None:
     '''Functions that generates the table for exercise 2 pushing it to the XCOM backend with key table_1
 
@@ -35,7 +35,6 @@ def generate_table_1(ti,path: str = '/opt/airflow/data/intermediate/HourlyForeca
         logger.error(msg='Table 1 failed')
         raise ValueError
 
-@logger_verbose
 def generate_table_2(ti, path:str = '/opt/airflow/data/data_municipios') -> pd.DataFrame:
     '''Functions that generates the table for exercise 3 pushing it to the XCOM backend with key table_2
 
