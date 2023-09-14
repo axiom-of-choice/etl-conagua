@@ -61,7 +61,7 @@ bq = BigQueryConnector(os.environ['GCP_PROJECT'], os.environ['BQ_DATASET'])
 bucket = os.environ['S3_BUCKET']
 
 ###TO-DO: Remove HARCODED 
-filename = 'HourlyForecast_MX.gz'
+filename = 'DailyForecast_MX.gz'
 ####
 queries = toml.load("queries.toml")
 baste_table_query = queries['base_table']['creation_query']

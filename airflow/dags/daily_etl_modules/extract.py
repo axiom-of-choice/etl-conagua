@@ -30,10 +30,10 @@ def _extract_raw_file(url: str = API_URL) -> gzip.GzipFile:
     logger.info(msg='Request successful')
     return ftpstream.content
 
-def extract_process(s3_client: S3_Connector, url: str = API_URL) -> None:
+def extract_process(s3_client: S3_Connector, url: str = API_URL, bucket: str = os.environ['S3_BUCKET'], key :str = 'DailyForecast_MX.gz' ) -> None:
     ''' Requests the endpoint and uplaods the file to S3 bucket'''
     try:
-        s3_client.upload_s3(bucket=os.environ['S3_BUCKET'], obj=_extract_raw_file(url), key='HourlyForecast_MX.gz')
+        s3_client.upload_s3(bucket=bucket, obj=_extract_raw_file(url), key=key)
     except Exception as e:
         logger.exception(e)
 
