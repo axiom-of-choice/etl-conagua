@@ -3,10 +3,10 @@ from airflow.decorators import task
 from airflow.operators.python import PythonOperator
 import datetime
 from datetime import timedelta
-from weather_etl.utils import remove_staging_files
-from weather_etl.extract import extract
-from weather_etl.transform import generate_table_1, generate_table_2
-from weather_etl.load import write_local
+from hourly_etl_modules.utils import remove_staging_files
+from hourly_etl_modules.extract import extract
+from hourly_etl_modules.transform import generate_table_1, generate_table_2
+from hourly_etl_modules.load import write_local
 from airflow.models import DAG
 from airflow.utils.db import provide_session
 from airflow.models import XCom
