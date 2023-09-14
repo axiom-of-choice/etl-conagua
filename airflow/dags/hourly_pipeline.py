@@ -1,15 +1,15 @@
 from airflow import DAG
-from airflow.decorators import task
-from airflow.operators.python import PythonOperator
 import datetime
 from datetime import timedelta
-from hourly_etl_modules.utils import remove_staging_files
-from hourly_etl_modules.extract import extract
-from hourly_etl_modules.transform import generate_table_1, generate_table_2
-from hourly_etl_modules.load import write_local
+from hourly_etl_modules.extract import _extract_raw_file
 from airflow.models import DAG
-from airflow.utils.db import provide_session
-from airflow.models import XCom
+from custom_operators.S3_BQ import S3ToBigQuery
+from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
+from airflow.providers.amazon.aws.operators.s3 import S3CreateObjectOperator
+import os
+import toml
+from daily_etl_modules.aws.s3 import S3_Connector
+from daily_etl_modules.gcp.bigquery import BigQueryConnector
 
 
 default_args = {
@@ -28,16 +28,18 @@ default_args = {
 }
 
 
-@provide_session
-def cleanup_xcom(session=None):
-    #dag_id = context["ti"]["dag_id"]
-    num_rows_deleted = 0
-    try:
-        num_rows_deleted = session.query(XCom).delete()
-        session.commit()
-    except:
-        session.rollback()
-    print(f"Deleted {num_rows_deleted} XCom rows")
+s3 = S3_Connector(os.environ['S3_ACCESS_KEY_ID'], os.environ['S3_SECRET_ACCESS_KEY'])
+bq_project = os.environ['GCP_PROJECT']
+bq_dataset = os.environ['BQ_DATASET']
+bq = BigQueryConnector(os.environ['GCP_PROJECT'], os.environ['BQ_DATASET'])
+bucket = os.environ['S3_BUCKET']
+
+bucket = os.environ['S3_BUCKET']
+queries = toml.load('queries.toml')
+base_table_hourly_query = queries['base_table_hourly']['creation_query']
+query_hourly_aggregate = queries['aggregations_hourly']['example_query']
+filename = 'HourlyForecast_MX.gz'
+
 
 with DAG(
     'weather_dag',
@@ -45,16 +47,10 @@ with DAG(
     description='ETL for the weahter web service',
     schedule_interval='0 * * * *', catchup=False
 ) as dag:
-    clean_staging_zone_task = PythonOperator(task_id = 'remove_staging_files', python_callable=remove_staging_files)
-    extract_task = PythonOperator(task_id='extract', python_callable=extract)
-    generate_table_1_task = PythonOperator(task_id = 'generate_table_1', python_callable=generate_table_1)
-    generate_table_2_task = PythonOperator(task_id = 'generate_table_2', python_callable=generate_table_2)
-    load_table_1_task = PythonOperator(task_id = 'load_table_1', python_callable = write_local, op_kwargs={'path':'/opt/airflow/data/processed/process_1/table_1','key':'table_1', 'task_id': 'generate_table_1'})
-    load_table_2_task = PythonOperator(task_id = 'load_table_2', python_callable = write_local, op_kwargs={'path':'/opt/airflow/data/processed/process_2/table_2','key':'table_2', 'task_id': 'generate_table_2'})
-    load_table_2_current_task = PythonOperator(task_id = 'load_table_2_current', python_callable = write_local, op_kwargs={'path':'/opt/airflow/data/processed/process_2/table_2', 'key': 'table_2', 'task_id':'generate_table_2', 'partition':'current'})
-    clean_xcom=PythonOperator(task_id='clean_xcom', python_callable=cleanup_xcom)
+    create_base_table = BigQueryExecuteQueryOperator(task_id='create_hourly_base_table', sql=base_table_hourly_query, use_legacy_sql=False, gcp_conn_id='GCP')
+    upload_s3_task = S3CreateObjectOperator(s3_bucket=bucket,s3_key="{{ds}}/" + filename, task_id='upload_s3', data=_extract_raw_file(os.environ['CONAGUA_API_HOURLY']), aws_conn_id='AWS', replace=True)
+    load_raw_table = S3ToBigQuery(s3_client=s3, bq_client=bq, bucket=bucket, bq_table='raw_hourly_table', filename=filename, task_id='load_raw_hourly_table')
+    aggregate_examples = BigQueryExecuteQueryOperator(task_id='aggregate_houryl_examples', sql=query_hourly_aggregate, use_legacy_sql=False, gcp_conn_id='GCP',
+                                                      destination_dataset_table=f"{bq_project}.{bq_dataset}.aggregated_hourly_examples", write_disposition='WRITE_TRUNCATE')
     
-    extract_task >> generate_table_1_task 
-    generate_table_1_task >> load_table_1_task >> clean_staging_zone_task
-    generate_table_1_task >> generate_table_2_task >> load_table_2_task >> load_table_2_current_task >> clean_staging_zone_task
-    clean_staging_zone_task >> clean_xcom
+    create_base_table >> upload_s3_task >> load_raw_table >> aggregate_examples
