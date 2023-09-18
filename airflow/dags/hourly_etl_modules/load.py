@@ -1,8 +1,8 @@
-import pandas as pd
 import datetime
-from .utils import logger, logger_verbose
+import logging
+logger = logging.getLogger(__name__)
 
-@logger_verbose
+
 def write_local(path:str, **kwargs) -> int:
     '''Function that writes the files in the local storage
 

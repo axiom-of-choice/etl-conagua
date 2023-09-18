@@ -141,3 +141,4 @@ airflow/data/data_municipios/20220501/.DS_Store
 bq_sa.json
 airflow.cfg
 *.DS_Store
+airflow/logs/*
