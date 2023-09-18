@@ -15,14 +15,14 @@ class S3_Connector:
         self.secret_key = secret_key
         self.s3_client = boto3.client('s3', aws_access_key_id=self.access_key, aws_secret_access_key=self.secret_key)
     
-    def download_s3_json(self, partition_date : Optional[str] = today, bucket: str = None, file_name: str = "HourlyForecast_MX.gz") -> Any :
+    def download_s3_json(self, partition_date : Optional[str] = today, bucket: str = None, file_name: str = "DailyForecast_MX.gz") -> Any :
         """Download the file from s3
 
         Args:
             s3_client (boto3.client): Client of s3
             partition_date (str, optional): Date of partition (if exists). In format "YYYY-MM-DD". Defaults to None.
             bucket (str, optional): Bucket name. Defaults to os.environ["S3_BUCKET"].
-            file_name (str, optional): Name of the file. Defaults to "HourlyForecast_MX.gz".
+            file_name (str, optional): Name of the file. Defaults to "DailyForecast_MX.gz".
         Returns:
             Any: File downloaded
         """
@@ -39,14 +39,14 @@ class S3_Connector:
         object_content = json.loads(object_content)
         return object_content
     
-    def upload_s3(self, bucket: str, obj: Any, key: str ='HourlyForecast_MX.gz', partition_date: Optional[str]=today) -> None:
+    def upload_s3(self, bucket: str, obj: Any, key: str ='DailyForecast_MX.gz', partition_date: Optional[str]=today) -> None:
         """Upload object into s3
 
         Args:
             s3client (boto3.client): Client of s3
             bucket (str): Bucket name
             obj (Any): Object
-            key (str, optional): Name of the object. Defaults to 'HourlyForecast_MX.gz'.
+            key (str, optional): Name of the object. Defaults to 'DailyForecast_MX.gz'.
             partition_date (datetime, optional): Prefix of the object. Defaults to datetime.datetime.today().date().isoformat().
         """
         key = f'{partition_date}/{key}'
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     
     load_dotenv()
     s3_client = S3_Connector(os.environ['S3_ACCESS_KEY_ID'], os.environ['S3_SECRET_ACCESS_KEY'])
-    file = s3_client.download_s3_json(partition_date='2023-09-02', bucket=os.environ["S3_BUCKET"], file_name="HourlyForecast_MX.gz")
+    file = s3_client.download_s3_json(partition_date='2023-09-02', bucket=os.environ["S3_BUCKET"], file_name="DailyForecast_MX.gz")
     #print(file[0])
     import pandas as pd
     print(pd.DataFrame(file).head())
