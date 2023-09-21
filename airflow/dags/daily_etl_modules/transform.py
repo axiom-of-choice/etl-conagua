@@ -34,7 +34,6 @@ def generate_table_2(df:pd.DataFrame, df1: pd.DataFrame) -> pd.DataFrame:
     '''Functions that generates the table for exercise 3 pushing it to the XCOM backend with key table_2
 
     Args:
-        path (str, optional): Path of the json file to be read. Defaults to '/opt/airflow/data/intermediate/HourlyForecast_MX.json'.
 
     Raises:
         ValueError: If fails the execution just for handling purposes
@@ -55,18 +54,6 @@ def generate_table_2(df:pd.DataFrame, df1: pd.DataFrame) -> pd.DataFrame:
         raise ValueError
 
 
-# def transform(path: str = './data/intermediate/HourlyForecast_MX.json') -> pd.DataFrame:
-#     '''Wrapper that generates both tables
-# 
-#     Args:
-#         path (str, optional): Path where json data staging is stored. Defaults to './data/raw/HourlyForecast_MX.json'.
-#     Returns:
-#         pd.DataFrame: Both dataframes. Table1, table2
-#     '''
-#     logging.info("Performing extract")
-#     table_1 = generate_table_1(path)
-#     table_2 = generate_table_2(table_1)
-#     return table_1, table_2
 
 ## if __name__ == '__main__':
 ##     table_1 = generate_table_1()

@@ -2,7 +2,8 @@ import logging
 import os
 from functools import wraps
 # create logger
-logger = logging.getLogger("logging application")
+import logging
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 # create console handler and set level to debug
@@ -38,7 +39,6 @@ def logger_verbose(func):
 
     return wrapper
 
-@logger_verbose
 def remove_staging_files(paths:list = ['/opt/airflow/data/raw', '/opt/airflow/data/intermediate']):
     '''Removes all raw and intermediate files used to generate the final tables to avoid duplication
 
