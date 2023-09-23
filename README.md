@@ -6,8 +6,9 @@ This repository is a project consisting of an ELT pipeline using Airflow in a Do
 1. Request the follwing endpoint to download information about weather foerecast in Mexico per day by municipality: https://smn.conagua.gob.mx/tools/GUI/webservices/?method=1 and https://smn.conagua.gob.mx/tools/GUI/webservices/?method=3 per hour.
 2. Uploads the Data into an S3 Bucket
 3. Load the raw data into BigQuery and computes the following aggregates:
-4. Generate a table that has the average temperature and precipitation by municipality of the last two hours. 
-5. Generate a joined table between the first generated table and the latest pre-computed data (data_municipios).
+4. Generate a sample query.
+5. Generate a table that has the average temperature and precipitation by municipality of the last two hours. (WIP)
+6. Generate a joined table between the first generated table and the latest pre-computed data (data_municipios). (WIP)
 
 ## How to use it?
 
@@ -30,6 +31,11 @@ I used Pandas as data manipulation layer because it offers a complete solution t
 The file directory follows and standard etl pipeline structure, we have:
 *   *airflow/* Includes:
     - dags/ directory where it's located the etls modules and custom operators that we will be using into the pipelines DAG to mantain the DAG file clean and organized
+        - custom_operators: Directory containing all the custom operators
+        - daily_etl_modules: Modules used in daily_pipeline.py DAG
+        - hourly_etl_modules: Modules used in hourly_pipeline.py DAG
+        - daily_pipeline.py and hourly_pipeline.py DAGS
+        - utils.py. Helper common functiions
     - *data/* Includes:
         - *data_municipios/*: Where it's stored static data about municipios (It should be in another place like a Database or storage service)
     - Airflow config files.: *aiflow.cfg, airflow.db, webserver_config.py*
