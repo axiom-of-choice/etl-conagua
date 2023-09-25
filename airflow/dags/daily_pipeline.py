@@ -7,9 +7,9 @@ from datetime import timedelta
 from airflow.models import DAG
 from airflow.providers.amazon.aws.operators.s3 import S3CreateObjectOperator, S3Hook
 from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
-from custom_operators.S3_BQ import S3ToBigQuery
-from daily_etl_modules.aws.s3 import S3_Connector
-from daily_etl_modules.gcp.bigquery import BigQueryConnector
+from common.custom_operators.S3_BQ import S3ToBigQuery
+from common.aws.s3 import S3_Connector
+from common.gcp.bigquery import BigQueryConnector
 import os
 from daily_etl_modules.extract import _extract_raw_file, extract_process
 from daily_etl_modules.transform import generate_table_1, generate_table_2
@@ -82,4 +82,4 @@ with DAG(
     aggregate_examples = BigQueryExecuteQueryOperator(task_id='aggregate_examples', sql=query_aggregate, use_legacy_sql=False, gcp_conn_id='GCP',
                                                       destination_dataset_table=f"{bq_project}.{bq_dataset}.aggregated_examples", write_disposition='WRITE_TRUNCATE')
     
-    create_base_table >> upload_s3_task >> load_raw_table >> aggregate_examples
+    create_base_table >> upload_s3_task >> load_raw_table >> aggregate_exampless

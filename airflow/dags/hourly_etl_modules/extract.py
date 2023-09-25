@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 ##Move S3 Connector module to utils
-from daily_etl_modules.aws.s3 import S3_Connector
+from common.aws.s3 import S3_Connector
 from dotenv import load_dotenv
 load_dotenv()
 import os

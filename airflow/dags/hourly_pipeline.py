@@ -1,15 +1,53 @@
 from airflow import DAG
 import datetime
 from datetime import timedelta
-from hourly_etl_modules.extract import _extract_raw_file
+#from hourly_etl_modules.extract import _extract_raw_file
 from airflow.models import DAG
-from custom_operators.S3_BQ import S3ToBigQuery
+from common.custom_operators.S3_BQ import S3ToBigQuery
 from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
 from airflow.providers.amazon.aws.operators.s3 import S3CreateObjectOperator
 import os
 import toml
-from daily_etl_modules.aws.s3 import S3_Connector
-from daily_etl_modules.gcp.bigquery import BigQueryConnector
+from common.aws.s3 import S3_Connector
+from common.gcp.bigquery import BigQueryConnector
+import logging
+import requests
+import gzip
+logger = logging.getLogger(__name__)
+from dotenv import load_dotenv
+load_dotenv()
+
+API_URL = os.environ['CONAGUA_API']
+
+
+
+
+def _extract_raw_file(url: str = API_URL) -> gzip.GzipFile:
+    ''' Requests the endpoint and retrieve the file compressed
+
+    Args:
+        url (str): url of the endpoint. Defaults to "https://smn.conagua.gob.mx/tools/GUI/webservices/?method=1"
+
+    Returns:
+        gzip.GzipFile: Route of the compressed file
+    '''
+    try:
+        logger.info(msg='Requesting endpoint')
+        ftpstream = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
+    except Exception as e:
+        logger.exception(e)
+        logger.error(msg='Extract raw file failed')
+        raise ValueError
+    logger.info(msg='Request successful')
+    return ftpstream.content
+
+def extract_process(s3_client: S3_Connector, url: str = API_URL) -> None:
+    ''' Requests the endpoint and uplaods the file to S3 bucket'''
+    try:
+        s3_client.upload_s3(bucket=os.environ['S3_BUCKET'], obj=_extract_raw_file(url), key='HourlyForecast_MX.gz')
+    except Exception as e:
+        logger.exception(e)
+
 
 
 default_args = {

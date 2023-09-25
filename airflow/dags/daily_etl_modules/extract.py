@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 import logging
 logger = logging.getLogger(__name__)
-from daily_etl_modules.aws.s3 import S3_Connector
+from common.aws.s3 import S3_Connector
 
 load_dotenv()
 
