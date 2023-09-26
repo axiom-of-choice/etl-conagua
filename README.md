@@ -1,4 +1,4 @@
-# Data Engineering Challenge
+# Data ELT Pipeline Project
 
 ## What is this repo for?
 
@@ -30,14 +30,16 @@ I used Pandas as data manipulation layer because it offers a complete solution t
 ### File structure
 The file directory follows and standard etl pipeline structure, we have:
 *   *airflow/* Includes:
-    - dags/ directory where it's located the etls modules and custom operators that we will be using into the pipelines DAG to mantain the DAG file clean and organized
-        - custom_operators: Directory containing all the custom operators
-        - daily_etl_modules: Modules used in daily_pipeline.py DAG
-        - hourly_etl_modules: Modules used in hourly_pipeline.py DAG
-        - daily_pipeline.py and hourly_pipeline.py DAGS
-        - utils.py. Helper common functiions
+    - common/ Directory containing all the common modules
+        - custom_operators: Directory containing all the Airflow custom operators
+        - aws: AWS custom classes for the use cae (wrapper of boto3)
+        - gcp: Google Cloud custom classes for the use case (wrapper for gcp library)
+        - utils.py: Helper common functions
+    - dags/ directory where it's located the DAGS for bth pipelines
+        - daily_pipeline.py: DAG
+        - hourly_pipeline.py: DAG
     - *data/* Includes:
-        - *data_municipios/*: Where it's stored static data about municipios (It should be in another place like a Database or storage service)
+        - *data_municipios/*: Where it's stored static data about municipios (It is also stored in BigQuery but i placed here for the other users.)
     - Airflow config files.: *aiflow.cfg, airflow.db, webserver_config.py*
     - queries.toml (File containing queries to be run into BigQuery)
 * *example.env* Env file of example (**You need to replace some env variables like S3 and BigQuery configuration)

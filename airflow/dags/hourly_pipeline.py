@@ -1,15 +1,24 @@
 from airflow import DAG
 import datetime
 from datetime import timedelta
-from hourly_etl_modules.extract import _extract_raw_file
+#from hourly_etl_modules.extract import _extract_raw_file
 from airflow.models import DAG
-from custom_operators.S3_BQ import S3ToBigQuery
+from common import S3ToBigQuery
 from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
 from airflow.providers.amazon.aws.operators.s3 import S3CreateObjectOperator
 import os
 import toml
-from daily_etl_modules.aws.s3 import S3_Connector
-from daily_etl_modules.gcp.bigquery import BigQueryConnector
+from common.aws.s3 import S3_Connector
+from common.gcp.bigquery import BigQueryConnector
+from common.utils import _extract_raw_file
+import logging
+logger = logging.getLogger(__name__)
+from dotenv import load_dotenv
+load_dotenv()
+
+API_URL = os.environ['CONAGUA_API']
+
+
 
 
 default_args = {

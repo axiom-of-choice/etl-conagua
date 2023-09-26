@@ -1,8 +1,8 @@
 from typing import Any, Optional
 from airflow.models.baseoperator import BaseOperator
 from airflow.utils.context import Context
-from daily_etl_modules.aws.s3 import S3_Connector
-from daily_etl_modules.gcp.bigquery import BigQueryConnector
+from common.aws.s3 import S3_Connector
+from common.gcp.bigquery import BigQueryConnector
 import pandas as pd
 import datetime as dt
 

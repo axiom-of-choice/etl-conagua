@@ -6,6 +6,14 @@ import datetime
 logger = logging.getLogger("logging application")
 logger.setLevel(logging.DEBUG)
 from pathlib import Path
+from inspect import getargs
+from dotenv import load_dotenv
+import requests
+import gzip
+from common.aws.s3 import S3_Connector
+
+API_URL = os.environ['CONAGUA_API']
+
 
 BASE_PAHT = Path(__file__).resolve().parent
 
@@ -59,3 +67,45 @@ def validate_date(date_text):
             datetime.date.fromisoformat(date_text)
         except ValueError:
             raise ValueError("Incorrect data format, should be YYYY-MM-DD")
+
+
+def allow_kwargs(func):
+    argspec = getargs(func)
+    # if the original allows kwargs then do nothing
+    if  argspec.keywords:
+        return func
+    @wraps(func)
+    def newfoo(*args, **kwargs):
+        #print "newfoo called with args=%r kwargs=%r"%(args,kwargs)
+        some_args = dict((k,kwargs[k]) for k in argspec.args if k in kwargs) 
+        return func(*args, **some_args)
+    return newfoo
+
+
+# Extract funcs
+
+def _extract_raw_file(url: str) -> gzip.GzipFile:
+    ''' Requests the endpoint and retrieve the file compressed
+
+    Args:
+        url (str): url of the endpoint. Defaults to "https://smn.conagua.gob.mx/tools/GUI/webservices/?method=1"
+
+    Returns:
+        gzip.GzipFile: Route of the compressed file
+    '''
+    try:
+        logger.info(msg='Requesting endpoint')
+        ftpstream = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
+    except Exception as e:
+        logger.exception(e)
+        logger.error(msg='Extract raw file failed')
+        raise ValueError
+    logger.info(msg='Request successful')
+    return ftpstream.content
+
+def extract_process(s3_client: S3_Connector, url: str) -> None:
+    ''' Requests the endpoint and uplaods the file to S3 bucket'''
+    try:
+        s3_client.upload_s3(bucket=os.environ['S3_BUCKET'], obj=_extract_raw_file(url), key='HourlyForecast_MX.gz')
+    except Exception as e:
+        logger.exception(e)
