@@ -11,8 +11,7 @@ from common.custom_operators.S3_BQ import S3ToBigQuery
 from common.aws.s3 import S3_Connector
 from common.gcp.bigquery import BigQueryConnector
 import os
-from daily_etl_modules.extract import _extract_raw_file, extract_process
-from daily_etl_modules.transform import generate_table_1, generate_table_2
+from common.utils import _extract_raw_file
 from dotenv import load_dotenv
 load_dotenv()
 import toml
@@ -82,4 +81,4 @@ with DAG(
     aggregate_examples = BigQueryExecuteQueryOperator(task_id='aggregate_examples', sql=query_aggregate, use_legacy_sql=False, gcp_conn_id='GCP',
                                                       destination_dataset_table=f"{bq_project}.{bq_dataset}.aggregated_examples", write_disposition='WRITE_TRUNCATE')
     
-    create_base_table >> upload_s3_task >> load_raw_table >> aggregate_exampless
+    create_base_table >> upload_s3_task >> load_raw_table >> aggregate_examples
