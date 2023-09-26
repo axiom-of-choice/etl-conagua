@@ -8,6 +8,7 @@ RUN apt-get update \
 ADD requirements.txt .
 COPY ./bq_sa.json /opt/airflow/bq_sa.json
 USER "${AIRFLOW_UID}:0"
+ENV PYTHONPATH="${PYTHONPATH}:/opt/airflow"
 RUN pip install -r requirements.txt
 RUN pip install --upgrade cffi
 RUN airflow db upgrade
